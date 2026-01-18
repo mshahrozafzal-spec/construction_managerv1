@@ -1,5 +1,5 @@
 // lib/utils/time_tracker.dart
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class TimeTracker {
   final DBHelper dbHelper;

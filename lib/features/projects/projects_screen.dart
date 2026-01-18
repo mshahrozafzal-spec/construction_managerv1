@@ -1,6 +1,6 @@
 // lib/features/projects/projects_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 import 'package:construction_manager/features/projects/add_project_screen.dart';
 
 class ProjectsScreen extends StatefulWidget {
@@ -81,14 +81,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Create your first project to get started',
+            'Create your first ProjectModel to get started',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: _addNewProject,
             icon: const Icon(Icons.add),
-            label: const Text('Create Project'),
+            label: const Text('Create ProjectModel'),
           ),
         ],
       ),
@@ -102,21 +102,21 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         itemCount: _projects.length,
         padding: const EdgeInsets.all(16),
         itemBuilder: (context, index) {
-          final project = _projects[index];
-          return _buildProjectCard(project);
+          final ProjectModel = _projects[index];
+          return _buildProjectCard(ProjectModel);
         },
       ),
     );
   }
 
-  Widget _buildProjectCard(Map<String, dynamic> project) {
-    final projectName = project['name'] ?? 'Unnamed Project';
-    final status = project['status'] ?? 'active';
-    final startDate = project['start_date'] ?? '';
-    final endDate = project['end_date'] ?? '';
-    final projectId = project['id'] as int? ?? 0;
-    final budget = project['budget'] as double? ?? 0.0;
-    final clientName = project['client_name'] ?? '';
+  Widget _buildProjectCard(Map<String, dynamic> ProjectModel) {
+    final projectName = ProjectModel['name'] ?? 'Unnamed ProjectModel';
+    final status = ProjectModel['status'] ?? 'active';
+    final startDate = ProjectModel['start_date'] ?? '';
+    final endDate = ProjectModel['end_date'] ?? '';
+    final projectId = ProjectModel['id'] as int? ?? 0;
+    final budget = ProjectModel['budget'] as double? ?? 0.0;
+    final clientName = ProjectModel['client_name'] ?? '';
 
     return Dismissible(
       key: Key('project_$projectId'),
@@ -129,7 +129,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          return await _showDeleteConfirmation(project);
+          return await _showDeleteConfirmation(ProjectModel);
         }
         return false;
       },
@@ -196,7 +196,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             ],
           ),
           trailing: PopupMenuButton<String>(
-            onSelected: (value) => _handlePopupSelection(value, project),
+            onSelected: (value) => _handlePopupSelection(value, ProjectModel),
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 'view',
@@ -251,24 +251,24 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               ),
             ],
           ),
-          onTap: () => _viewProjectDetails(project),
-          onLongPress: () => _showProjectOptions(project),
+          onTap: () => _viewProjectDetails(ProjectModel),
+          onLongPress: () => _showProjectOptions(ProjectModel),
         ),
       ),
     );
   }
 
-  Future<bool> _showDeleteConfirmation(Map<String, dynamic> project) async {
+  Future<bool> _showDeleteConfirmation(Map<String, dynamic> ProjectModel) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Project'),
+        title: const Text('Delete ProjectModel'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Are you sure you want to delete "${project['name']}"?'),
+            Text('Are you sure you want to delete "${ProjectModel['name']}"?'),
             const SizedBox(height: 16),
             const Text(
               '⚠️ Warning: This action will also delete:',
@@ -302,7 +302,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     return result ?? false;
   }
 
-  void _showProjectOptions(Map<String, dynamic> project) {
+  void _showProjectOptions(Map<String, dynamic> ProjectModel) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -312,10 +312,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
-                title: const Text('Edit Project'),
+                title: const Text('Edit ProjectModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _editProject(project);
+                  _editProject(ProjectModel);
                 },
               ),
               ListTile(
@@ -323,37 +323,37 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 title: const Text('View Details'),
                 onTap: () {
                   Navigator.pop(context);
-                  _viewProjectDetails(project);
+                  _viewProjectDetails(ProjectModel);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.copy, color: Colors.orange),
-                title: const Text('Duplicate Project'),
+                title: const Text('Duplicate ProjectModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _duplicateProject(project);
+                  _duplicateProject(ProjectModel);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.archive, color: Colors.grey),
-                title: const Text('Archive Project'),
+                title: const Text('Archive ProjectModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _archiveProject(project['id'] as int);
+                  _archiveProject(ProjectModel['id'] as int);
                 },
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text(
-                  'Delete Project',
+                  'Delete ProjectModel',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () async {
                   Navigator.pop(context);
-                  final confirmed = await _showDeleteConfirmation(project);
+                  final confirmed = await _showDeleteConfirmation(ProjectModel);
                   if (confirmed) {
-                    _deleteProject(project['id'] as int);
+                    _deleteProject(ProjectModel['id'] as int);
                   }
                 },
               ),
@@ -393,24 +393,24 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     }
   }
 
-  void _handlePopupSelection(String value, Map<String, dynamic> project) {
+  void _handlePopupSelection(String value, Map<String, dynamic> ProjectModel) {
     switch (value) {
       case 'edit':
-        _editProject(project);
+        _editProject(ProjectModel);
         break;
       case 'view':
-        _viewProjectDetails(project);
+        _viewProjectDetails(ProjectModel);
         break;
       case 'duplicate':
-        _duplicateProject(project);
+        _duplicateProject(ProjectModel);
         break;
       case 'archive':
-        _archiveProject(project['id'] as int);
+        _archiveProject(ProjectModel['id'] as int);
         break;
       case 'delete':
-        _showDeleteConfirmation(project).then((confirmed) {
+        _showDeleteConfirmation(ProjectModel).then((confirmed) {
           if (confirmed) {
-            _deleteProject(project['id'] as int);
+            _deleteProject(ProjectModel['id'] as int);
           }
         });
         break;
@@ -430,20 +430,20 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     });
   }
 
-  void _editProject(Map<String, dynamic> project) {
-    // Navigate to edit project screen
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => EditProjectScreen(project: project)))
+  void _editProject(Map<String, dynamic> ProjectModel) {
+    // Navigate to edit ProjectModel screen
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => EditProjectScreen(ProjectModel: ProjectModel)))
     //     .then((_) => _loadProjects());
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit Project screen coming soon')),
+      const SnackBar(content: Text('Edit ProjectModel screen coming soon')),
     );
   }
 
-  void _viewProjectDetails(Map<String, dynamic> project) {
-    // Navigate to project details screen
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectDetailsScreen(project: project)));
+  void _viewProjectDetails(Map<String, dynamic> ProjectModel) {
+    // Navigate to ProjectModel details screen
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectDetailsScreen(ProjectModel: ProjectModel)));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Project Details screen coming soon')),
+      const SnackBar(content: Text('ProjectModel Details screen coming soon')),
     );
   }
 
@@ -453,7 +453,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Project deleted'),
+          content: const Text('ProjectModel deleted'),
           action: SnackBarAction(
             label: 'UNDO',
             textColor: Colors.white,
@@ -470,7 +470,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting project: $e'),
+          content: Text('Error deleting ProjectModel: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -482,30 +482,30 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       await _dbHelper.updateProject(id, {'status': 'archived'});
       _loadProjects();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Project archived')),
+        const SnackBar(content: Text('ProjectModel archived')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error archiving project: $e')),
+        SnackBar(content: Text('Error archiving ProjectModel: $e')),
       );
     }
   }
 
-  Future<void> _duplicateProject(Map<String, dynamic> project) async {
+  Future<void> _duplicateProject(Map<String, dynamic> ProjectModel) async {
     try {
-      final newProject = Map<String, dynamic>.from(project);
+      final newProject = Map<String, dynamic>.from(ProjectModel);
       newProject.remove('id');
-      newProject['name'] = '${project['name']} (Copy)';
+      newProject['name'] = '${ProjectModel['name']} (Copy)';
       newProject['created_at'] = DateTime.now().toIso8601String();
 
       await _dbHelper.insertProject(newProject);
       _loadProjects();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Project duplicated')),
+        const SnackBar(content: Text('ProjectModel duplicated')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error duplicating project: $e')),
+        SnackBar(content: Text('Error duplicating ProjectModel: $e')),
       );
     }
   }

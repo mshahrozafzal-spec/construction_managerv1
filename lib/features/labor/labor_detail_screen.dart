@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class LaborDetailScreen extends StatefulWidget {
-  final dynamic labor; // Replace 'dynamic' with your Labor model type
+  final dynamic LaborModel; // Replace 'dynamic' with your LaborModel model type
 
-  const LaborDetailScreen({Key? key, required this.labor}) : super(key: key);
+  const LaborDetailScreen({Key? key, required this.LaborModel}) : super(key: key);
 
   @override
   State<LaborDetailScreen> createState() => _LaborDetailScreenState();
@@ -14,18 +14,18 @@ class _LaborDetailScreenState extends State<LaborDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.labor.name ?? 'Labor Details'),
+        title: Text(widget.LaborModel.name ?? 'LaborModel Details'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Add your labor detail widgets here
-            Text('Labor ID: ${widget.labor.id}'),
-            Text('Name: ${widget.labor.name}'),
-            Text('Phone: ${widget.labor.phone}'),
-            Text('Rate: \$${widget.labor.rate?.toStringAsFixed(2)}'),
+            // Add your LaborModel detail widgets here
+            Text('LaborModel ID: ${widget.LaborModel.id}'),
+            Text('Name: ${widget.LaborModel.name}'),
+            Text('Phone: ${widget.LaborModel.phone}'),
+            Text('Rate: \$${widget.LaborModel.rate?.toStringAsFixed(2)}'),
             // Add more details as needed
           ],
         ),

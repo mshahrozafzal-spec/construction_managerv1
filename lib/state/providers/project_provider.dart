@@ -1,22 +1,22 @@
 // lib/state/providers/project_provider.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
-import 'package:construction_manager/database/models/project.dart';
-import 'package:construction_manager/database/repositories/project_repository.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
+import 'package:construction_manager/data/models/project_model.dart';
+import 'package:construction_manager/data/repositories/project_repository.dart';
 
 class ProjectProvider extends ChangeNotifier {
   final DBHelper dbHelper;
-  List<Project> _projects = [];
+  List<ProjectModel> _projects = [];
   bool _isLoading = false;
-  Project? _selectedProject;
+  ProjectModel? _selectedProject;
 
   ProjectProvider({required this.dbHelper}) {
     _repository = ProjectRepository(dbHelper: dbHelper);
   }
 
-  List<Project> get projects => _projects;
+  List<ProjectModel> get projects => _projects;
   bool get isLoading => _isLoading;
-  Project? get selectedProject => _selectedProject;
+  ProjectModel? get selectedProject => _selectedProject;
 
   late final ProjectRepository _repository;
 
@@ -34,42 +34,42 @@ class ProjectProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addProject(Project project) async {
+  Future<void> addProject(ProjectModel ProjectModel) async {
     try {
-      final id = await _repository.addProject(project);
-      final newProject = project.copyWith(id: id);
+      final id = await _repository.addProject(ProjectModel);
+      final newProject = ProjectModel.copyWith(id: id);
       _projects.add(newProject);
       notifyListeners();
     } catch (e) {
-      print('Error adding project: $e');
+      print('Error adding ProjectModel: $e');
     }
   }
 
-  Future<void> updateProject(Project project) async {
+  Future<void> updateProject(ProjectModel ProjectModel) async {
     try {
-      await _repository.updateProject(project);
-      final index = _projects.indexWhere((p) => p.id == project.id);
+      await _repository.updateProject(ProjectModel);
+      final index = _projects.indexWhere((p) => p.id == ProjectModel.id);
       if (index != -1) {
-        _projects[index] = project;
+        _projects[index] = ProjectModel;
         notifyListeners();
       }
     } catch (e) {
-      print('Error updating project: $e');
+      print('Error updating ProjectModel: $e');
     }
   }
 
   Future<void> deleteProject(int id) async {
     try {
       await _repository.deleteProject(id);
-      _projects.removeWhere((project) => project.id == id);
+      _projects.removeWhere((ProjectModel) => ProjectModel.id == id);
       notifyListeners();
     } catch (e) {
-      print('Error deleting project: $e');
+      print('Error deleting ProjectModel: $e');
     }
   }
 
-  void selectProject(Project? project) {
-    _selectedProject = project;
+  void selectProject(ProjectModel? ProjectModel) {
+    _selectedProject = ProjectModel;
     notifyListeners();
   }
 }

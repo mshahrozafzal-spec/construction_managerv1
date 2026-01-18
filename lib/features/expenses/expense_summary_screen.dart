@@ -1,6 +1,6 @@
 // lib/features/expenses/expense_summary_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class ExpenseSummaryScreen extends StatelessWidget {
   final int projectId;
@@ -24,15 +24,15 @@ class ExpenseSummaryScreen extends StatelessWidget {
 
         // Group expenses by category
         Map<String, double> categoryTotals = {};
-        for (var expense in expenses) {
-          final category = expense['category'] as String? ?? 'Uncategorized';
-          final amount = (expense['amount'] as num?)?.toDouble() ?? 0.0;
+        for (var ExpenseModel in expenses) {
+          final category = ExpenseModel['category'] as String? ?? 'Uncategorized';
+          final amount = (ExpenseModel['amount'] as num?)?.toDouble() ?? 0.0;
           categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
         }
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Expense Summary'),
+            title: const Text('ExpenseModel Summary'),
           ),
           body: ListView(
             children: [
@@ -54,9 +54,9 @@ class ExpenseSummaryScreen extends StatelessWidget {
     final dbHelper = DBHelper();
     final expenses = await dbHelper.getAllExpenses();
 
-    // Filter by project
-    return expenses.where((expense) {
-      final expProjectId = expense['project_id'];
+    // Filter by ProjectModel
+    return expenses.where((ExpenseModel) {
+      final expProjectId = ExpenseModel['project_id'];
       return expProjectId == projectId;
     }).toList();
   }

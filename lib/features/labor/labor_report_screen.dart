@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/repositories/labor_repository.dart';
-import 'package:construction_manager/database/repositories/attendance_repository.dart';
+import 'package:construction_manager/data/repositories/labor_repository.dart';
+import 'package:construction_manager/data/repositories/attendance_repository.dart';
 
 class LaborReportScreen extends StatefulWidget {
   final int? projectId;
@@ -26,14 +26,14 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
     if (widget.projectId != null) {
       _laborRepository.getLaborsByProject(widget.projectId!).then((labors) {
         // Convert Labors to List<Map<String, dynamic>>
-        final laborMaps = labors.map((labor) => labor.toMap()).toList();
+        final laborMaps = labors.map((LaborModel) => LaborModel.toMap()).toList();
         setState(() {
           _laborFuture = Future.value(laborMaps);
         });
       });
     } else {
       _laborRepository.getAllLabors().then((labors) {
-        final laborMaps = labors.map((labor) => labor.toMap()).toList();
+        final laborMaps = labors.map((LaborModel) => LaborModel.toMap()).toList();
         setState(() {
           _laborFuture = Future.value(laborMaps);
         });
@@ -45,7 +45,7 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Labor Report'),
+        title: const Text('LaborModel Report'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _laborFuture,
@@ -63,9 +63,9 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
           // Calculate totals
           double totalMonthlyWage = 0;
           double totalAdvance = 0;
-          for (var labor in labors) {
-            totalMonthlyWage += labor['monthly_wage'] as double? ?? 0.0;
-            totalAdvance += labor['total_advance'] as double? ?? 0.0;
+          for (var LaborModel in labors) {
+            totalMonthlyWage += LaborModel['monthly_wage'] as double? ?? 0.0;
+            totalAdvance += LaborModel['total_advance'] as double? ?? 0.0;
           }
 
           return Column(
@@ -88,7 +88,7 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const Text('Total Labor'),
+                              const Text('Total LaborModel'),
                             ],
                           ),
                         ),
@@ -117,23 +117,23 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
                 ),
               ),
 
-              // Labor list
+              // LaborModel list
               Expanded(
                 child: ListView.builder(
                   itemCount: labors.length,
                   itemBuilder: (context, index) {
-                    final labor = labors[index];
+                    final LaborModel = labors[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: ListTile(
-                        title: Text(labor['name'] as String? ?? 'Unknown'),
+                        title: Text(LaborModel['name'] as String? ?? 'Unknown'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Role: ${labor['role'] ?? 'N/A'}'),
-                            Text('Status: ${labor['status'] ?? 'N/A'}'),
-                            Text('Monthly Wage: \$${(labor['monthly_wage'] as double? ?? 0.0).toStringAsFixed(2)}'),
-                            Text('Advance: \$${(labor['total_advance'] as double? ?? 0.0).toStringAsFixed(2)}'),
+                            Text('Role: ${LaborModel['role'] ?? 'N/A'}'),
+                            Text('Status: ${LaborModel['status'] ?? 'N/A'}'),
+                            Text('Monthly Wage: \$${(LaborModel['monthly_wage'] as double? ?? 0.0).toStringAsFixed(2)}'),
+                            Text('Advance: \$${(LaborModel['total_advance'] as double? ?? 0.0).toStringAsFixed(2)}'),
                           ],
                         ),
                       ),

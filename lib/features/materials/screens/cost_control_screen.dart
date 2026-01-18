@@ -1,7 +1,7 @@
-// lib/features/materials/screens/cost_control_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:construction_manager/state/material_provider.dart';
+import 'package:construction_manager/data/models/material_model.dart';
 
 class CostControlScreen extends StatefulWidget {
   const CostControlScreen({super.key});
@@ -277,86 +277,86 @@ class _CostControlScreenState extends State<CostControlScreen> {
     final total = entries.fold(0.0, (sum, entry) => sum + entry.value);
 
     return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Category-wise Spending',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Category-wise Spending',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Chip(
-                    label: Text('₹${total.toStringAsFixed(2)}'),
-                    backgroundColor: Colors.blue.withAlpha(25),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ...entries.map((entry) {
-                final percentage = total > 0 ? (entry.value / total * 100) : 0;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              entry.key,
-                              style: const TextStyle(fontSize: 14),
-                            ),
+                ),
+                Chip(
+                  label: Text('₹${total.toStringAsFixed(2)}'),
+                  backgroundColor: Colors.blue.withAlpha(25),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...entries.map((entry) {
+              final percentage = total > 0 ? (entry.value / total * 100) : 0;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            style: const TextStyle(fontSize: 14),
                           ),
-                          Text(
-                            '₹${entry.value.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      LinearProgressIndicator(
-                        value: percentage / 100,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          _getCategoryColor(entry.key),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${percentage.toStringAsFixed(1)}% of total',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                        Text(
+                          '₹${entry.value.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
                           ),
-                          Text(
-                            '${(entry.value / _totalInventoryValue * 100).toStringAsFixed(1)}% of inventory',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      value: percentage / 100,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        _getCategoryColor(entry.key),
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ],
-          ),
-        );
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${percentage.toStringAsFixed(1)}% of total',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          '${(entry.value / _totalInventoryValue * 100).toStringAsFixed(1)}% of inventory',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -581,8 +581,7 @@ class _CostControlScreenState extends State<CostControlScreen> {
     try {
       final report = await provider.generateInventoryReportAsync();
 
-      // TODO: Implement PDF/Excel export
-      // For now, show a preview
+      // Show report preview
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -596,8 +595,8 @@ class _CostControlScreenState extends State<CostControlScreen> {
                 final item = report[index];
                 return ListTile(
                   title: Text(item['name'] as String),
-                  subtitle: Text('Stock: ${item['stock']} ${item['unit']}'),
-                  trailing: Text('₹${item['total_value']}'),
+                  subtitle: Text('${item['category']} - Stock: ${item['stock']} ${item['unit']}'),
+                  trailing: Text('₹${(item['total_value'] as double).toStringAsFixed(2)}'),
                 );
               },
             ),
@@ -627,7 +626,7 @@ class _CostControlScreenState extends State<CostControlScreen> {
     }
   }
 
-  void _reorderMaterial(Material material) {
+  void _reorderMaterial(MaterialModel material) {
     // TODO: Navigate to order screen
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -640,7 +639,7 @@ class _CostControlScreenState extends State<CostControlScreen> {
     );
   }
 
-  void _bulkReorder(List<Material> materials) {
+  void _bulkReorder(List<MaterialModel> materials) {
     // TODO: Implement bulk ordering
     final totalCost = materials.fold(0.0, (sum, material) {
       final required = (material.minStockLevel ?? 0) - material.currentStock;

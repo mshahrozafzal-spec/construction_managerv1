@@ -1,10 +1,9 @@
-// lib/features/projects/project_form_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/project.dart';
-import 'package:construction_manager/database/repositories/project_repository.dart';
+import 'package:construction_manager/data/models/project_model.dart';
+import 'package:construction_manager/data/repositories/project_repository.dart';
 
 class ProjectFormScreen extends StatefulWidget {
-  final Project? project;
+  final ProjectModel? project;
 
   const ProjectFormScreen({super.key, this.project});
 
@@ -107,7 +106,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Project Name',
+                          labelText: 'Project Name *',
                           prefixIcon: const Icon(Icons.work),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -170,7 +169,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'Start Date',
+                                      'Start Date *',
                                       style: TextStyle(color: Colors.grey),
                                     ),
                                     const SizedBox(height: 4),
@@ -249,6 +248,16 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Budget is required';
+                          }
+                          final budget = double.tryParse(value);
+                          if (budget == null || budget <= 0) {
+                            return 'Please enter a valid budget amount';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -264,6 +273,16 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Progress is required';
+                                }
+                                final progress = double.tryParse(value);
+                                if (progress == null || progress < 0 || progress > 100) {
+                                  return 'Progress must be between 0-100';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -271,7 +290,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                             child: DropdownButtonFormField<String>(
                               value: _status,
                               decoration: InputDecoration(
-                                labelText: 'Status',
+                                labelText: 'Status *',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -288,6 +307,12 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                                     _status = value;
                                   });
                                 }
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Status is required';
+                                }
+                                return null;
                               },
                             ),
                           ),
@@ -319,12 +344,18 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                       TextFormField(
                         controller: _clientNameController,
                         decoration: InputDecoration(
-                          labelText: 'Client Name',
+                          labelText: 'Client Name *',
                           prefixIcon: const Icon(Icons.person),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Client name is required';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -387,12 +418,18 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                       TextFormField(
                         controller: _locationController,
                         decoration: InputDecoration(
-                          labelText: 'Site Location',
+                          labelText: 'Site Location *',
                           prefixIcon: const Icon(Icons.location_on),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Site location is required';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -507,7 +544,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
 
   Future<void> _saveProject() async {
     if (_formKey.currentState!.validate() && _startDate != null) {
-      final project = Project(
+      final project = ProjectModel(
         id: widget.project?.id,
         name: _nameController.text,
         description: _descriptionController.text,
@@ -520,7 +557,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
         status: _status,
         progress: double.tryParse(_progressController.text) ?? 0.0,
         location: _locationController.text,
-        spent: 0.0,
+        spent: widget.project?.spent ?? 0.0,
       );
 
       try {

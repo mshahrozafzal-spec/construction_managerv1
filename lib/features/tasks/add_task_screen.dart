@@ -1,6 +1,6 @@
 // lib/features/tasks/add_task_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -80,7 +80,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Task'),
+        title: const Text('Add New TaskModel'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -109,13 +109,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       TextFormField(
                         controller: _titleController,
                         decoration: const InputDecoration(
-                          labelText: 'Task Title *',
+                          labelText: 'TaskModel Title *',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.title),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter task title';
+                            return 'Please enter TaskModel title';
                           }
                           return null;
                         },
@@ -137,7 +137,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
               const SizedBox(height: 16),
 
-              // Project & Type
+              // ProjectModel & Type
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -145,26 +145,26 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Project & Type',
+                        'ProjectModel & Type',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<int?>(
                         value: _selectedProjectId,
                         decoration: const InputDecoration(
-                          labelText: 'Project (Optional)',
+                          labelText: 'ProjectModel (Optional)',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.work),
                         ),
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('No Project'),
+                            child: Text('No ProjectModel'),
                           ),
-                          ..._projects.map((project) {
+                          ..._projects.map((ProjectModel) {
                             return DropdownMenuItem(
-                              value: project['id'] as int,
-                              child: Text(project['name'].toString()),
+                              value: ProjectModel['id'] as int,
+                              child: Text(ProjectModel['name'].toString()),
                             );
                           }).toList(),
                         ],
@@ -178,7 +178,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       DropdownButtonFormField<String>(
                         value: _type,
                         decoration: const InputDecoration(
-                          labelText: 'Task Type',
+                          labelText: 'TaskModel Type',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.category),
                         ),
@@ -437,7 +437,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   onPressed: _saveTask,
                   icon: const Icon(Icons.save),
                   label: const Text(
-                    'Save Task',
+                    'Save TaskModel',
                     style: TextStyle(fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -505,7 +505,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         return;
       }
 
-      final task = {
+      final TaskModel = {
         'project_id': _selectedProjectId,
         'title': _titleController.text,
         'description': _descriptionController.text,
@@ -521,10 +521,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       };
 
       try {
-        await _dbHelper.insertTask(task);
+        await _dbHelper.insertTask(TaskModel);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Task saved successfully'),
+            content: Text('TaskModel saved successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -532,7 +532,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving task: $e'),
+            content: Text('Error saving TaskModel: $e'),
             backgroundColor: Colors.red,
           ),
         );

@@ -1,8 +1,9 @@
-// lib/features/materials/screens/add_material_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:construction_manager/state/material_provider.dart';
 import 'package:construction_manager/data/models/material_model.dart';
+import 'package:construction_manager/data/models/material_category_model.dart';
+import 'package:construction_manager/data/models/supplier_model.dart';
 
 class AddMaterialScreen extends StatefulWidget {
   const AddMaterialScreen({super.key});
@@ -35,7 +36,6 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   @override
   void initState() {
     super.initState();
-    // Load categories and suppliers when screen initializes
     Future.microtask(() {
       final provider = Provider.of<MaterialProvider>(context, listen: false);
       provider.loadMaterials();
@@ -441,7 +441,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         if (_selectedCategory != null) {
           final category = provider.categories.firstWhere(
                 (c) => c.name == _selectedCategory,
-            orElse: () => MaterialCategory(name: '', createdAt: DateTime.now()),
+            orElse: () => MaterialCategoryModel(name: '', createdAt: DateTime.now()),
           );
           categoryId = category.id;
         }
@@ -451,12 +451,12 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         if (_selectedSupplier != null) {
           final supplier = provider.suppliers.firstWhere(
                 (s) => s.name == _selectedSupplier,
-            orElse: () => Supplier(name: '', createdAt: DateTime.now()),
+            orElse: () => SupplierModel(name: '', createdAt: DateTime.now()),
           );
           supplierId = supplier.id;
         }
 
-        final material = Material(
+        final material = MaterialModel(
           name: _nameController.text,
           code: _codeController.text.isNotEmpty ? _codeController.text : null,
           description: _descriptionController.text.isNotEmpty

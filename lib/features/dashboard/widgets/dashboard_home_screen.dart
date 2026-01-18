@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/project.dart';
+import 'package:construction_manager/data/models/project_model.dart';
 
 class DashboardHomeScreen extends StatelessWidget {
-  final List<Project> projects;
+  final List<ProjectModel> projects;
 
   const DashboardHomeScreen({super.key, required this.projects});
 
@@ -11,21 +11,21 @@ class DashboardHomeScreen extends StatelessWidget {
     return ListView.builder(
       itemCount: projects.length,
       itemBuilder: (context, index) {
-        final project = projects[index];
+        final ProjectModel = projects[index];
         return Card(
           child: ListTile(
-            title: Text(project.name),
+            title: Text(ProjectModel.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Fixed: Changed from project.client to project.clientName
-                Text(project.clientName),
-                Text('Progress: ${project.progress.toStringAsFixed(1)}%'),
+                // Fixed: Changed from ProjectModel.client to ProjectModel.clientName
+                Text(ProjectModel.clientName),
+                Text('Progress: ${ProjectModel.progress.toStringAsFixed(1)}%'),
               ],
             ),
             trailing: Chip(
-              label: Text(project.status),
-              backgroundColor: project.status == 'Active'
+              label: Text(ProjectModel.status),
+              backgroundColor: ProjectModel.status == 'Active'
                   ? Colors.green.withOpacity(0.2)
                   : Colors.grey.withOpacity(0.2),
             ),

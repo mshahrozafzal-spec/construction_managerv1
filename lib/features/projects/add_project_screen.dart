@@ -1,6 +1,6 @@
 // lib/features/projects/add_project_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class AddProjectScreen extends StatefulWidget {
   const AddProjectScreen({super.key});
@@ -34,7 +34,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Project'),
+        title: const Text('Add New ProjectModel'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -68,13 +68,13 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                       TextFormField(
                         controller: _nameController,
                         decoration: const InputDecoration(
-                          labelText: 'Project Name *',
+                          labelText: 'ProjectModel Name *',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.work),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter project name';
+                            return 'Please enter ProjectModel name';
                           }
                           return null;
                         },
@@ -325,7 +325,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                   onPressed: _saveProject,
                   icon: const Icon(Icons.save),
                   label: const Text(
-                    'Save Project',
+                    'Save ProjectModel',
                     style: TextStyle(fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -370,7 +370,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
       if (_nameController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please enter project name'),
+            content: Text('Please enter ProjectModel name'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -387,7 +387,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
         return;
       }
 
-      final project = {
+      final ProjectModel = {
         'name': _nameController.text,
         'description': _descriptionController.text,
         'client_name': _clientNameController.text,
@@ -401,10 +401,10 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
       };
 
       try {
-        await _dbHelper.insertProject(project);
+        await _dbHelper.insertProject(ProjectModel);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Project saved successfully'),
+            content: Text('ProjectModel saved successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -412,7 +412,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving project: $e'),
+            content: Text('Error saving ProjectModel: $e'),
             backgroundColor: Colors.red,
           ),
         );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/task.dart';
+import 'package:construction_manager/data/models/task_model.dart';
 
 class GanttChartWidget extends StatelessWidget {
-  final List<Task> tasks;
+  final List<TaskModel> tasks;
 
   const GanttChartWidget({
     super.key,
@@ -14,25 +14,25 @@ class GanttChartWidget extends StatelessWidget {
     return ListView.builder(
       itemCount: tasks.length,
       itemBuilder: (context, index) {
-        final task = tasks[index];
+        final TaskModel = tasks[index];
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: ListTile(
-            title: Text(task.title),
+            title: Text(TaskModel.title),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Type: ${task.type}'),
-                Text('Status: ${task.status}'),
-                Text('Start: ${task.startDate.toLocal().toString().split(' ')[0]}'),
-                if (task.endDate != null)
-                  Text('End: ${task.endDate!.toLocal().toString().split(' ')[0]}'),
-                Text('Progress: ${task.progress}%'),
+                Text('Type: ${TaskModel.type}'),
+                Text('Status: ${TaskModel.status}'),
+                Text('Start: ${TaskModel.startDate.toLocal().toString().split(' ')[0]}'),
+                if (TaskModel.endDate != null)
+                  Text('End: ${TaskModel.endDate!.toLocal().toString().split(' ')[0]}'),
+                Text('Progress: ${TaskModel.progress}%'),
               ],
             ),
             trailing: Chip(
-              label: Text(task.priority),
-              backgroundColor: task.getPriorityColor().withOpacity(0.2),
+              label: Text(TaskModel.priority),
+              backgroundColor: TaskModel.getPriorityColor().withOpacity(0.2),
             ),
           ),
         );

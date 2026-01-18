@@ -1,7 +1,7 @@
 // lib/features/expenses/expenses_screen.dart
 import 'package:flutter/material.dart';
 import 'package:construction_manager/features/expenses/add_expense_screen.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class ExpensesScreen extends StatefulWidget {
   final int? projectId;
@@ -31,7 +31,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
     try {
       if (widget.projectId != null) {
-        // Get expenses for specific project
+        // Get expenses for specific ProjectModel
         _expenses = await _dbHelper.getExpensesByProject(widget.projectId!);
       } else {
         // Get all expenses
@@ -40,8 +40,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
       // Calculate total - FIXED
       _totalExpenses = 0.0;
-      for (var expense in _expenses) {
-        final amount = expense['amount'];
+      for (var ExpenseModel in _expenses) {
+        final amount = ExpenseModel['amount'];
         if (amount != null) {
           // Convert to double safely
           if (amount is int) {
@@ -67,7 +67,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: widget.projectId != null
-            ? const Text('Project Expenses')
+            ? const Text('ProjectModel Expenses')
             : const Text('All Expenses'),
       ),
       body: _isLoading
@@ -106,7 +106,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Add your first expense',
+            'Add your first ExpenseModel',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -123,7 +123,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 }
               });
             },
-            child: const Text('Add Expense'),
+            child: const Text('Add ExpenseModel'),
           ),
         ],
       ),
@@ -163,8 +163,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           child: ListView.builder(
             itemCount: _expenses.length,
             itemBuilder: (context, index) {
-              final expense = _expenses[index];
-              return _buildExpenseCard(expense);
+              final ExpenseModel = _expenses[index];
+              return _buildExpenseCard(ExpenseModel);
             },
           ),
         ),
@@ -172,12 +172,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildExpenseCard(Map<String, dynamic> expense) {
-    final description = expense['description'] ?? 'No description';
-    final category = expense['category'] ?? 'Uncategorized';
-    final amount = expense['amount'];
-    final date = expense['date']?.toString() ?? '';
-    final notes = expense['notes']?.toString() ?? '';
+  Widget _buildExpenseCard(Map<String, dynamic> ExpenseModel) {
+    final description = ExpenseModel['description'] ?? 'No description';
+    final category = ExpenseModel['category'] ?? 'Uncategorized';
+    final amount = ExpenseModel['amount'];
+    final date = ExpenseModel['date']?.toString() ?? '';
+    final notes = ExpenseModel['notes']?.toString() ?? '';
 
     // Safely convert amount to double
     double amountValue = 0.0;
@@ -225,8 +225,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             color: Colors.red[700],
           ),
         ),
-        onTap: () => _viewExpenseDetails(expense),
-        onLongPress: () => _showExpenseOptions(expense),
+        onTap: () => _viewExpenseDetails(ExpenseModel),
+        onLongPress: () => _showExpenseOptions(ExpenseModel),
       ),
     );
   }
@@ -235,7 +235,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     switch (category.toLowerCase()) {
       case 'materials':
         return Colors.blue;
-      case 'labor':
+      case 'LaborModel':
         return Colors.green;
       case 'equipment':
         return Colors.orange;
@@ -254,7 +254,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     switch (category.toLowerCase()) {
       case 'materials':
         return Icons.build;
-      case 'labor':
+      case 'LaborModel':
         return Icons.people;
       case 'equipment':
         return Icons.settings;
@@ -278,26 +278,26 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }
   }
 
-  void _viewExpenseDetails(Map<String, dynamic> expense) {
+  void _viewExpenseDetails(Map<String, dynamic> ExpenseModel) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Expense Details'),
+        title: const Text('ExpenseModel Details'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Description: ${expense['description'] ?? 'N/A'}'),
+            Text('Description: ${ExpenseModel['description'] ?? 'N/A'}'),
             const SizedBox(height: 8),
-            Text('Category: ${expense['category'] ?? 'N/A'}'),
+            Text('Category: ${ExpenseModel['category'] ?? 'N/A'}'),
             const SizedBox(height: 8),
-            Text('Amount: ₹${(expense['amount'] ?? 0).toString()}'),
+            Text('Amount: ₹${(ExpenseModel['amount'] ?? 0).toString()}'),
             const SizedBox(height: 8),
-            if (expense['date'] != null)
-              Text('Date: ${_formatDate(expense['date'].toString())}'),
+            if (ExpenseModel['date'] != null)
+              Text('Date: ${_formatDate(ExpenseModel['date'].toString())}'),
             const SizedBox(height: 8),
-            if (expense['notes'] != null && expense['notes'].toString().isNotEmpty)
-              Text('Notes: ${expense['notes']}'),
+            if (ExpenseModel['notes'] != null && ExpenseModel['notes'].toString().isNotEmpty)
+              Text('Notes: ${ExpenseModel['notes']}'),
           ],
         ),
         actions: [
@@ -310,7 +310,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  void _showExpenseOptions(Map<String, dynamic> expense) {
+  void _showExpenseOptions(Map<String, dynamic> ExpenseModel) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -323,15 +323,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 title: const Text('View Details'),
                 onTap: () {
                   Navigator.pop(context);
-                  _viewExpenseDetails(expense);
+                  _viewExpenseDetails(ExpenseModel);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.green),
-                title: const Text('Edit Expense'),
+                title: const Text('Edit ExpenseModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Implement edit expense
+                  // TODO: Implement edit ExpenseModel
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Edit feature coming soon')),
                   );
@@ -341,12 +341,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text(
-                  'Delete Expense',
+                  'Delete ExpenseModel',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _deleteExpense(expense['id'] as int);
+                  _deleteExpense(ExpenseModel['id'] as int);
                 },
               ),
             ],
@@ -360,8 +360,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Expense'),
-        content: const Text('Are you sure you want to delete this expense?'),
+        title: const Text('Delete ExpenseModel'),
+        content: const Text('Are you sure you want to delete this ExpenseModel?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -381,11 +381,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         await _dbHelper.deleteExpense(expenseId);
         _loadExpenses();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Expense deleted')),
+          const SnackBar(content: Text('ExpenseModel deleted')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting expense: $e')),
+          SnackBar(content: Text('Error deleting ExpenseModel: $e')),
         );
       }
     }

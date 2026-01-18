@@ -1,5 +1,4 @@
-// lib/data/models/material_category_model.dart
-class MaterialCategory {
+class MaterialCategoryModel {
   int? id;
   String name;
   String? description;
@@ -7,7 +6,7 @@ class MaterialCategory {
   String? icon;
   DateTime createdAt;
 
-  MaterialCategory({
+  MaterialCategoryModel({
     this.id,
     required this.name,
     this.description,
@@ -16,8 +15,8 @@ class MaterialCategory {
     required this.createdAt,
   });
 
-  factory MaterialCategory.fromMap(Map<String, dynamic> map) {
-    return MaterialCategory(
+  factory MaterialCategoryModel.fromMap(Map<String, dynamic> map) {
+    return MaterialCategoryModel(
       id: map['id'] as int?,
       name: map['name'] as String,
       description: map['description'] as String?,
@@ -40,6 +39,6 @@ class MaterialCategory {
 
   @override
   String toString() {
-    return 'MaterialCategory(id: $id, name: $name, icon: $icon)';
+    return 'MaterialCategoryModel(id: $id, name: $name)';
   }
 }

@@ -1,5 +1,4 @@
-// lib/data/models/supplier_model.dart
-class Supplier {
+class SupplierModel {
   int? id;
   String name;
   String? contactPerson;
@@ -13,7 +12,7 @@ class Supplier {
   String? notes;
   DateTime createdAt;
 
-  Supplier({
+  SupplierModel({
     this.id,
     required this.name,
     this.contactPerson,
@@ -28,8 +27,8 @@ class Supplier {
     required this.createdAt,
   });
 
-  factory Supplier.fromMap(Map<String, dynamic> map) {
-    return Supplier(
+  factory SupplierModel.fromMap(Map<String, dynamic> map) {
+    return SupplierModel(
       id: map['id'] as int?,
       name: map['name'] as String,
       contactPerson: map['contact_person'] as String?,
@@ -66,6 +65,6 @@ class Supplier {
 
   @override
   String toString() {
-    return 'Supplier(id: $id, name: $name, contact: $contactPerson)';
+    return 'SupplierModel(id: $id, name: $name)';
   }
 }

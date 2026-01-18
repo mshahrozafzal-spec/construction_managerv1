@@ -20,7 +20,7 @@ class AttendanceScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Text('Mark and view labor attendance'),
+            Text('Mark and view LaborModel attendance'),
           ],
         ),
       ),

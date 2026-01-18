@@ -14,7 +14,7 @@ class ExpensePieChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Expense Breakdown',
+              'ExpenseModel Breakdown',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -31,7 +31,7 @@ class ExpensePieChart extends StatelessWidget {
               )).toList()
             else
               const Center(
-                child: Text('No expense data'),
+                child: Text('No ExpenseModel data'),
               ),
           ],
         ),

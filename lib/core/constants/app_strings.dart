@@ -12,7 +12,7 @@ class AppStrings {
 
   // Projects
   static const String projects = 'Projects';
-  static const String projectName = 'Project Name';
+  static const String projectName = 'ProjectModel Name';
   static const String clientName = 'Client Name';
   static const String location = 'Location';
   static const String budget = 'Budget';
@@ -21,7 +21,7 @@ class AppStrings {
 
   // Tasks
   static const String tasks = 'Tasks';
-  static const String taskName = 'Task Name';
+  static const String taskName = 'TaskModel Name';
   static const String status = 'Status';
   static const String progress = 'Progress';
 

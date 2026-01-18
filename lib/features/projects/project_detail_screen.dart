@@ -1,256 +1,211 @@
-// lib/features/projects/project_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/project.dart';
-import 'package:construction_manager/database/models/task.dart';
-import 'package:construction_manager/database/models/labor.dart';
-import 'package:construction_manager/database/repositories/task_repository.dart';
-import 'package:construction_manager/database/repositories/labor_repository.dart';
-import 'package:construction_manager/features/expenses/add_expense_screen.dart';
-import 'package:construction_manager/features/expenses/expenses_screen.dart';
-import 'package:construction_manager/features/tasks/add_task_screen.dart';
-import 'package:construction_manager/features/labor/add_labor_screen.dart';
 
-class ProjectDetailScreen extends StatefulWidget {
-  final Project project;
+class ProjectDetailScreen extends StatelessWidget {
+  final dynamic project;
 
   const ProjectDetailScreen({super.key, required this.project});
-
-  @override
-  State<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
-}
-
-class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
-  late TaskRepository _taskRepository;
-  late LaborRepository _laborRepository;
-  List<Task> _tasks = [];
-  List<Labor> _labors = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _taskRepository = TaskRepository();
-    _laborRepository = LaborRepository();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      if (widget.project.id != null) {
-        _tasks = await _taskRepository.getTasksByProject(widget.project.id!);
-        _labors = await _laborRepository.getLaborsByProject(widget.project.id!);
-      }
-    } catch (e) {
-      print('Error loading data: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.project.name),
+        title: Text(project['name'] ?? 'Project Details'),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Project details section
+            // Basic Information Card
             Card(
-              margin: const EdgeInsets.all(16),
+              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.project.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text('Client: ${widget.project.clientName}'),
-                    Text('Contact: ${widget.project.contactPerson}'),
-                    Text('Location: ${widget.project.location}'),
-                    Text('Budget: \$${widget.project.budget.toStringAsFixed(2)}'),
-                    Text('Spent: \$${widget.project.spent.toStringAsFixed(2)}'),
-                    Text('Remaining: \$${(widget.project.budget - widget.project.spent).toStringAsFixed(2)}'),
-                    Text('Progress: ${widget.project.progress.toStringAsFixed(1)}%'),
-                    const SizedBox(height: 16),
-                    LinearProgressIndicator(
-                      value: widget.project.progress / 100,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        widget.project.progress >= 100
-                            ? Colors.green
-                            : Colors.blue,
+                    const Text(
+                      'Basic Information',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Project Name', project['name'] ?? 'N/A'),
+                    _buildDetailRow('Description', project['description'] ?? 'N/A'),
+                    _buildDetailRow('Status', project['status'] ?? 'N/A'),
+                    _buildDetailRow('Progress', '${project['progress']?.toStringAsFixed(1) ?? '0'}%'),
                   ],
                 ),
               ),
             ),
 
-            // Tasks section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Tasks (${_tasks.length})',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddTaskScreen(),
-                        ),
-                      ).then((value) {
-                        if (value == true) {
-                          _loadData();
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 16),
 
-            if (_tasks.isNotEmpty)
-              ..._tasks.map((task) => Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: ListTile(
-                  title: Text(task.title),
-                  subtitle: Text('Status: ${task.status} • Progress: ${task.progress}%'),
-                  trailing: Chip(
-                    label: Text(task.priority),
-                    backgroundColor: task.getPriorityColor().withOpacity(0.2),
-                  ),
+            // Financial Information Card
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Financial Information',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Budget', '₹${(project['budget'] ?? 0).toStringAsFixed(2)}'),
+                    _buildDetailRow('Spent', '₹${(project['spent'] ?? 0).toStringAsFixed(2)}'),
+                    _buildDetailRow('Remaining', '₹${((project['budget'] ?? 0) - (project['spent'] ?? 0)).toStringAsFixed(2)}'),
+                  ],
                 ),
-              )).toList()
-            else
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('No tasks yet'),
-              ),
-
-            // Labor section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Labor (${_labors.length})',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddLaborScreen(),
-                        ),
-                      ).then((value) {
-                        if (value == true) {
-                          _loadData();
-                        }
-                      });
-                    },
-                  ),
-                ],
               ),
             ),
 
-            if (_labors.isNotEmpty)
-              ..._labors.map((labor) => Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: ListTile(
-                  title: Text(labor.name),
-                  subtitle: Column(
+            const SizedBox(height: 16),
+
+            // Timeline Card
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Timeline',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Start Date', _formatDate(project['startDate'])),
+                    if (project['endDate'] != null)
+                      _buildDetailRow('End Date', _formatDate(project['endDate'])),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Client Information Card
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Client Information',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Client Name', project['clientName'] ?? 'N/A'),
+                    _buildDetailRow('Contact Person', project['contactPerson'] ?? 'N/A'),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Location Card
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Location',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Site Location', project['location'] ?? 'N/A'),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Notes Card
+            if (project['notes'] != null && (project['notes'] as String).isNotEmpty)
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Role: ${labor.role}'),
-                      Text('Monthly Wage: \$${labor.monthlyWage.toStringAsFixed(2)}'),
+                      const Text(
+                        'Notes',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(project['notes'] ?? ''),
                     ],
                   ),
-                  trailing: Chip(
-                    label: Text(labor.status),
-                    backgroundColor: labor.getStatusColor().withOpacity(0.2),
-                  ),
-                ),
-              )).toList()
-            else
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('No labor assigned'),
-              ),
-
-            // Expenses section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Expenses',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddExpenseScreen(projectId: widget.project.id),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Expense navigation button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ExpensesScreen(projectId: widget.project.id),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.list),
-                  label: const Text('View All Expenses'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(dynamic date) {
+    if (date == null) return 'N/A';
+    if (date is DateTime) {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+    if (date is String) {
+      try {
+        final parsed = DateTime.parse(date);
+        return '${parsed.day}/${parsed.month}/${parsed.year}';
+      } catch (e) {
+        return date;
+      }
+    }
+    return date.toString();
   }
 }

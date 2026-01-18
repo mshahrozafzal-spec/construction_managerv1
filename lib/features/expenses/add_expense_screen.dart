@@ -1,6 +1,6 @@
 // lib/features/expenses/add_expense_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final int? projectId;
@@ -27,7 +27,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   final List<String> _categoryOptions = [
     'Materials',
-    'Labor',
+    'LaborModel',
     'Equipment',
     'Transport',
     'Rent',
@@ -62,7 +62,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Expense'),
+        title: const Text('Add ExpenseModel'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -76,7 +76,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Expense Details
+              // ExpenseModel Details
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -84,7 +84,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Expense Details',
+                        'ExpenseModel Details',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
@@ -175,7 +175,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Expense Date *',
+                                'ExpenseModel Date *',
                                 style: TextStyle(color: Colors.grey),
                               ),
                               const SizedBox(height: 4),
@@ -196,7 +196,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
               const SizedBox(height: 16),
 
-              // Project Selection (if not already set)
+              // ProjectModel Selection (if not already set)
               if (widget.projectId == null)
                 Card(
                   child: Padding(
@@ -205,31 +205,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Project (Optional)',
+                          'ProjectModel (Optional)',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<int?>(
                           decoration: const InputDecoration(
-                            labelText: 'Select Project',
+                            labelText: 'Select ProjectModel',
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.work),
                           ),
                           items: [
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('No Project (General Expense)'),
+                              child: Text('No ProjectModel (General ExpenseModel)'),
                             ),
-                            ..._projects.map((project) {
+                            ..._projects.map((ProjectModel) {
                               return DropdownMenuItem(
-                                value: project['id'] as int,
-                                child: Text(project['name'].toString()),
+                                value: ProjectModel['id'] as int,
+                                child: Text(ProjectModel['name'].toString()),
                               );
                             }).toList(),
                           ],
                           onChanged: (value) {
                             setState(() {
-                              // Store selected project ID
+                              // Store selected ProjectModel ID
                             });
                           },
                         ),
@@ -276,7 +276,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   onPressed: _saveExpense,
                   icon: const Icon(Icons.save),
                   label: const Text(
-                    'Save Expense',
+                    'Save ExpenseModel',
                     style: TextStyle(fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -317,14 +317,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       if (_expenseDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please select expense date'),
+            content: Text('Please select ExpenseModel date'),
             backgroundColor: Colors.orange,
           ),
         );
         return;
       }
 
-      final expense = {
+      final ExpenseModel = {
         'project_id': widget.projectId,
         'category': _category,
         'description': _descriptionController.text,
@@ -335,10 +335,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       };
 
       try {
-        await _dbHelper.insertExpense(expense);
+        await _dbHelper.insertExpense(ExpenseModel);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Expense saved successfully'),
+            content: Text('ExpenseModel saved successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -346,7 +346,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving expense: $e'),
+            content: Text('Error saving ExpenseModel: $e'),
             backgroundColor: Colors.red,
           ),
         );

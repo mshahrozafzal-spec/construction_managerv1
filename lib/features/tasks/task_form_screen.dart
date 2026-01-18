@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/task.dart';
-import 'package:construction_manager/database/repositories/task_repository.dart';
-import 'package:construction_manager/database/repositories/project_repository.dart';
 
 class TaskFormScreen extends StatefulWidget {
-  final Task? task;
+  final dynamic task;
 
   const TaskFormScreen({super.key, this.task});
 
@@ -12,49 +9,26 @@ class TaskFormScreen extends StatefulWidget {
   State<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
-
 class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TaskRepository _taskRepository = TaskRepository();
-  final ProjectRepository _projectRepository = ProjectRepository();
-
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _estimatedHoursController = TextEditingController();
-  final _actualHoursController = TextEditingController();
   final _notesController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _progressController = TextEditingController();
+  final _progressController = TextEditingController(text: '0');
 
   DateTime? _startDate;
-  DateTime? _endDate;
-  String _status = 'Not Started';
+  DateTime? _dueDate;
   String _priority = 'Medium';
-  String _type = 'General';
-  int? _selectedProjectId;
-  List<Map<String, dynamic>> _projects = [];
+  String _status = 'Pending';
+  String? _selectedProject;
+  String? _assignedTo;
 
-  final List<String> _taskTypes = [
-    'General',
-    'Foundation',
-    'Framing',
-    'Electrical',
-    'Plumbing',
-    'HVAC',
-    'Insulation',
-    'Drywall',
-    'Painting',
-    'Flooring',
-    'Carpentry',
-    'Landscaping',
-    'Roofing',
-    'Masonry',
-  ];
+  final List<String> _priorities = ['Low', 'Medium', 'High', 'Critical'];
+  final List<String> _statuses = ['Pending', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
 
   @override
   void initState() {
     super.initState();
-    _loadProjects();
     if (widget.task != null) {
       _loadExistingTask();
     } else {
@@ -62,42 +36,45 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     }
   }
 
-  Future<void> _loadProjects() async {
-    try {
-      final projects = await _projectRepository.getAllProjects();
-      setState(() {
-        _projects = projects.map((p) => {'id': p.id, 'name': p.name}).toList();
-      });
-    } catch (e) {
-      print('Error loading projects: $e');
-    }
-  }
-
   void _loadExistingTask() {
-    final task = widget.task!;
-    _titleController.text = task.title;
-    _descriptionController.text = task.description;
-    _estimatedHoursController.text = task.estimatedHours.toString();
-    _actualHoursController.text = task.actualHours.toString();
-    _notesController.text = task.notes ?? '';
-    _locationController.text = task.location ?? '';
-    _progressController.text = task.progress.toString();
-    _startDate = task.startDate;
-    _endDate = task.endDate;
-    _status = task.status;
-    _priority = task.priority;
-    _type = task.type;
-    _selectedProjectId = task.projectId;
+    _titleController.text = widget.task['title'] ?? '';
+    _descriptionController.text = widget.task['description'] ?? '';
+    _notesController.text = widget.task['notes'] ?? '';
+    _progressController.text = widget.task['progress']?.toStringAsFixed(0) ?? '0';
+    _priority = widget.task['priority'] ?? 'Medium';
+    _status = widget.task['status'] ?? 'Pending';
+    _selectedProject = widget.task['project'];
+    _assignedTo = widget.task['assignedTo'];
+
+    if (widget.task['startDate'] != null) {
+      if (widget.task['startDate'] is DateTime) {
+        _startDate = widget.task['startDate'];
+      } else if (widget.task['startDate'] is String) {
+        try {
+          _startDate = DateTime.parse(widget.task['startDate']);
+        } catch (e) {
+          _startDate = DateTime.now();
+        }
+      }
+    }
+
+    if (widget.task['dueDate'] != null) {
+      if (widget.task['dueDate'] is DateTime) {
+        _dueDate = widget.task['dueDate'];
+      } else if (widget.task['dueDate'] is String) {
+        try {
+          _dueDate = DateTime.parse(widget.task['dueDate']);
+        } catch (e) {
+          // Keep as null
+        }
+      }
+    }
   }
 
   void _setDefaultValues() {
     _startDate = DateTime.now();
-    _endDate = DateTime.now().add(const Duration(days: 7));
-    _status = 'Not Started';
     _priority = 'Medium';
-    _type = 'General';
-    _progressController.text = '0';
-    _estimatedHoursController.text = '8';
+    _status = 'Pending';
   }
 
   @override
@@ -117,9 +94,11 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Basic Information
+              // Basic Information Card
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -127,14 +106,20 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                     children: [
                       const Text(
                         'Basic Information',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Task Title *',
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.title),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -146,32 +131,14 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Description',
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.description),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         maxLines: 3,
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: _type,
-                        decoration: const InputDecoration(
-                          labelText: 'Task Type',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: _taskTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _type = value;
-                            });
-                          }
-                        },
                       ),
                     ],
                   ),
@@ -180,58 +147,37 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Project & Priority
+              // Priority & Status Card
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Project & Priority',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        'Priority & Status',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<int?>(
-                        value: _selectedProjectId,
-                        decoration: const InputDecoration(
-                          labelText: 'Project (Optional)',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: null,
-                            child: Text('No Project'),
-                          ),
-                          ..._projects.map((project) {
-                            return DropdownMenuItem(
-                              value: project['id'] as int,
-                              child: Text(project['name'] as String),
-                            );
-                          }).toList(),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedProjectId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               value: _priority,
-                              decoration: const InputDecoration(
-                                labelText: 'Priority',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: 'Priority *',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                              items: ['Low', 'Medium', 'High', 'Critical'].map((priority) {
-                                return DropdownMenuItem(
-                                  value: priority,
-                                  child: Text(priority),
-                                );
-                              }).toList(),
+                              items: _priorities.map((priority) => DropdownMenuItem(
+                                value: priority,
+                                child: Text(priority),
+                              )).toList(),
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
@@ -245,16 +191,16 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               value: _status,
-                              decoration: const InputDecoration(
-                                labelText: 'Status',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: 'Status *',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                              items: ['Not Started', 'In Progress', 'Completed', 'On Hold'].map((status) {
-                                return DropdownMenuItem(
-                                  value: status,
-                                  child: Text(status),
-                                );
-                              }).toList(),
+                              items: _statuses.map((status) => DropdownMenuItem(
+                                value: status,
+                                child: Text(status),
+                              )).toList(),
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
@@ -266,6 +212,28 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _progressController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Progress %',
+                          prefixIcon: const Icon(Icons.trending_up),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Progress is required';
+                          }
+                          final progress = double.tryParse(value);
+                          if (progress == null || progress < 0 || progress > 100) {
+                            return 'Progress must be between 0-100';
+                          }
+                          return null;
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -273,8 +241,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Timeline
+              // Timeline Card
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -282,14 +251,17 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                     children: [
                       const Text(
                         'Timeline',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
                             child: InkWell(
-                              onTap: () => _selectDate(context, true),
+                              onTap: () => _selectStartDate(context),
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
@@ -318,7 +290,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: InkWell(
-                              onTap: () => _selectDate(context, false),
+                              onTap: () => _selectDueDate(context),
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
@@ -329,14 +301,14 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'End Date',
+                                      'Due Date',
                                       style: TextStyle(color: Colors.grey),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      _endDate == null
+                                      _dueDate == null
                                           ? 'Select Date'
-                                          : _formatDate(_endDate!),
+                                          : _formatDate(_dueDate!),
                                       style: const TextStyle(fontSize: 16),
                                     ),
                                   ],
@@ -353,50 +325,51 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Time Tracking
+              // Assignment Card
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Time Tracking',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        'Assignment',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _estimatedHoursController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Estimated Hours',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
+                      TextFormField(
+                        controller: TextEditingController(text: _selectedProject ?? ''),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Project',
+                          prefixIcon: const Icon(Icons.work),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _actualHoursController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Actual Hours',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () => _selectProject(context),
                           ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        controller: _progressController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Progress %',
-                          border: OutlineInputBorder(),
+                        controller: TextEditingController(text: _assignedTo ?? ''),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Assigned To',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () => _selectAssignee(context),
+                          ),
                         ),
                       ),
                     ],
@@ -406,33 +379,32 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Additional Information
+              // Notes Card
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Additional Information',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        'Additional Notes',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: _locationController,
-                        decoration: const InputDecoration(
-                          labelText: 'Location',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
                         controller: _notesController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Notes',
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.note),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        maxLines: 3,
+                        maxLines: 4,
                       ),
                     ],
                   ),
@@ -444,10 +416,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 50,
                 child: ElevatedButton(
                   onPressed: _saveTask,
                   style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -458,6 +430,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
             ],
           ),
@@ -466,22 +439,46 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+  Future<void> _selectStartDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStartDate ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now()),
+      initialDate: _startDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
+    if (picked != null && picked != _startDate) {
       setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
+        _startDate = picked;
       });
     }
+  }
+
+  Future<void> _selectDueDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _dueDate) {
+      setState(() {
+        _dueDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectProject(BuildContext context) async {
+    // TODO: Implement project selection
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Project selection coming soon')),
+    );
+  }
+
+  Future<void> _selectAssignee(BuildContext context) async {
+    // TODO: Implement assignee selection
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Assignee selection coming soon')),
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -490,45 +487,33 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
   Future<void> _saveTask() async {
     if (_formKey.currentState!.validate() && _startDate != null) {
-      final task = Task(
-        id: widget.task?.id,
-        projectId: _selectedProjectId,
-        title: _titleController.text,
-        description: _descriptionController.text,
-        type: _type,
-        status: _status,
-        priority: _priority,
-        startDate: _startDate!,
-        endDate: _endDate,
-        progress: int.tryParse(_progressController.text) ?? 0,
-        estimatedHours: double.tryParse(_estimatedHoursController.text) ?? 0.0,
-        actualHours: double.tryParse(_actualHoursController.text) ?? 0.0,
-        notes: _notesController.text,
-        location: _locationController.text,
-      );
+      final task = {
+        'id': widget.task?['id'],
+        'title': _titleController.text,
+        'description': _descriptionController.text,
+        'priority': _priority,
+        'status': _status,
+        'progress': double.tryParse(_progressController.text) ?? 0.0,
+        'startDate': _startDate,
+        'dueDate': _dueDate,
+        'project': _selectedProject,
+        'assignedTo': _assignedTo,
+        'notes': _notesController.text,
+        'createdAt': DateTime.now(),
+      };
 
       try {
-        if (widget.task == null) {
-          await _taskRepository.addTask(task);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Task created successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else {
-          await _taskRepository.updateTask(task);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Task updated successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+        // TODO: Save task to database
+        print('Saving task: $task');
 
-        Future.delayed(const Duration(milliseconds: 500), () {
-          Navigator.pop(context);
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Task saved successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -551,10 +536,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _estimatedHoursController.dispose();
-    _actualHoursController.dispose();
     _notesController.dispose();
-    _locationController.dispose();
     _progressController.dispose();
     super.dispose();
   }

@@ -11,3 +11,7 @@ analyzer:
     - '**/*.g.dart'
     - '**/*.freezed.dart'
     - '**/generated_plugin_registrant.dart'
+
+    - lib/_backup/**
+    - lib/_backup_final/**
+    - lib/_backup_models/**

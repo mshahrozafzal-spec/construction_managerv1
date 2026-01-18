@@ -1,7 +1,7 @@
-// lib/features/labor/labor_screen.dart
+// lib/features/LaborModel/labor_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
-import 'package:construction_manager/features/labor/add_labor_screen.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
+import 'package:construction_manager/features/Labor/add_labor_screen.dart';
 class LaborScreen extends StatefulWidget {
   const LaborScreen({super.key});
 
@@ -44,8 +44,8 @@ class _LaborScreenState extends State<LaborScreen> {
     if (_filterStatus == 'All') {
       _filteredLabors = _labors;
     } else {
-      _filteredLabors = _labors.where((labor) {
-        final status = labor['status']?.toString() ?? '';
+      _filteredLabors = _labors.where((LaborModel) {
+        final status = LaborModel['status']?.toString() ?? '';
         return status == _filterStatus;
       }).toList();
     }
@@ -55,7 +55,7 @@ class _LaborScreenState extends State<LaborScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Labor Management'),
+        title: const Text('LaborModel Management'),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -106,18 +106,18 @@ class _LaborScreenState extends State<LaborScreen> {
           const Icon(Icons.people, size: 100, color: Colors.grey),
           const SizedBox(height: 20),
           const Text(
-            'No labor registered',
+            'No LaborModel registered',
             style: TextStyle(fontSize: 18, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           const Text(
-            'Add your first labor',
+            'Add your first LaborModel',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _addNewLabor,
-            child: const Text('Add Labor'),
+            child: const Text('Add LaborModel'),
           ),
         ],
       ),
@@ -130,20 +130,20 @@ class _LaborScreenState extends State<LaborScreen> {
       child: ListView.builder(
         itemCount: _filteredLabors.length,
         itemBuilder: (context, index) {
-          final labor = _filteredLabors[index];
-          return _buildLaborCard(labor);
+          final LaborModel = _filteredLabors[index];
+          return _buildLaborCard(LaborModel);
         },
       ),
     );
   }
 
-  Widget _buildLaborCard(Map<String, dynamic> labor) {
-    final name = labor['name'] ?? 'Unknown Labor';
-    final role = labor['role'] ?? 'Laborer';
-    final status = labor['status'] ?? 'Active';
-    final phone = labor['phone']?.toString() ?? '';
-    final rate = (labor['rate_per_hour'] as num?)?.toDouble() ?? 0.0;
-    final laborId = labor['id'] as int? ?? 0;
+  Widget _buildLaborCard(Map<String, dynamic> LaborModel) {
+    final name = LaborModel['name'] ?? 'Unknown LaborModel';
+    final role = LaborModel['role'] ?? 'Laborer';
+    final status = LaborModel['status'] ?? 'Active';
+    final phone = LaborModel['phone']?.toString() ?? '';
+    final rate = (LaborModel['rate_per_hour'] as num?)?.toDouble() ?? 0.0;
+    final laborId = LaborModel['id'] as int? ?? 0;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -183,8 +183,8 @@ class _LaborScreenState extends State<LaborScreen> {
           backgroundColor: _getStatusColor(status).withAlpha(25),
           labelStyle: TextStyle(color: _getStatusColor(status)),
         ),
-        onTap: () => _viewLaborDetails(labor),
-        onLongPress: () => _showLaborOptions(labor),
+        onTap: () => _viewLaborDetails(LaborModel),
+        onLongPress: () => _showLaborOptions(LaborModel),
       ),
     );
   }
@@ -244,13 +244,13 @@ class _LaborScreenState extends State<LaborScreen> {
     });
   }
 
-  void _viewLaborDetails(Map<String, dynamic> labor) {
+  void _viewLaborDetails(Map<String, dynamic> LaborModel) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Labor Details screen coming soon')),
+      const SnackBar(content: Text('LaborModel Details screen coming soon')),
     );
   }
 
-  void _showLaborOptions(Map<String, dynamic> labor) {
+  void _showLaborOptions(Map<String, dynamic> LaborModel) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -260,10 +260,10 @@ class _LaborScreenState extends State<LaborScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
-                title: const Text('Edit Labor'),
+                title: const Text('Edit LaborModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _editLabor(labor);
+                  _editLabor(LaborModel);
                 },
               ),
               ListTile(
@@ -271,27 +271,27 @@ class _LaborScreenState extends State<LaborScreen> {
                 title: const Text('View Details'),
                 onTap: () {
                   Navigator.pop(context);
-                  _viewLaborDetails(labor);
+                  _viewLaborDetails(LaborModel);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.assignment_ind, color: Colors.orange),
-                title: const Text('Assign to Project'),
+                title: const Text('Assign to ProjectModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _assignToProject(labor);
+                  _assignToProject(LaborModel);
                 },
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text(
-                  'Delete Labor',
+                  'Delete LaborModel',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _deleteLabor(labor['id'] as int);
+                  _deleteLabor(LaborModel['id'] as int);
                 },
               ),
             ],
@@ -301,15 +301,15 @@ class _LaborScreenState extends State<LaborScreen> {
     );
   }
 
-  void _editLabor(Map<String, dynamic> labor) {
+  void _editLabor(Map<String, dynamic> LaborModel) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit Labor screen coming soon')),
+      const SnackBar(content: Text('Edit LaborModel screen coming soon')),
     );
   }
 
-  void _assignToProject(Map<String, dynamic> labor) {
+  void _assignToProject(Map<String, dynamic> LaborModel) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Assign to Project screen coming soon')),
+      const SnackBar(content: Text('Assign to ProjectModel screen coming soon')),
     );
   }
 
@@ -317,8 +317,8 @@ class _LaborScreenState extends State<LaborScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Labor'),
-        content: const Text('Are you sure you want to delete this labor?'),
+        title: const Text('Delete LaborModel'),
+        content: const Text('Are you sure you want to delete this LaborModel?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -338,11 +338,11 @@ class _LaborScreenState extends State<LaborScreen> {
         await _dbHelper.deleteLabor(laborId);
         _loadLabors();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Labor deleted')),
+          const SnackBar(content: Text('LaborModel deleted')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting labor: $e')),
+          SnackBar(content: Text('Error deleting LaborModel: $e')),
         );
       }
     }

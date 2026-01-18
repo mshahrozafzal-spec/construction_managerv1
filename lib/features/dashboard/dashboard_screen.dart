@@ -1,14 +1,13 @@
-// lib/features/dashboard/dashboard_screen.dart
+// lib/features/dashboard/dashboard_screen.dart - FIXED VERSION
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart'; // FIXED IMPORT
 import 'package:construction_manager/features/projects/projects_screen.dart';
 import 'package:construction_manager/features/tasks/tasks_screen.dart';
-import 'package:construction_manager/features/labor/labor_screen.dart';
+import 'package:construction_manager/features/labor/labor_screen.dart'; // FIXED IMPORT
 import 'package:construction_manager/features/projects/project_form_screen.dart';
 import 'package:construction_manager/features/tasks/add_task_screen.dart';
-import 'package:construction_manager/features/labor/add_labor_screen.dart';
+import 'package:construction_manager/features/labor/add_labor_screen.dart'; // FIXED IMPORT
 import 'package:construction_manager/features/expenses/expenses_screen.dart';
-// ADD THESE TWO LINES FOR MATERIAL MANAGEMENT:
 import 'package:construction_manager/features/materials/screens/material_catalog_screen.dart';
 import 'package:construction_manager/features/materials/screens/cost_control_screen.dart';
 
@@ -135,7 +134,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
-          // Quick Actions Section - UPDATED WITH MATERIAL MANAGEMENT
+          // Quick Actions Section
           _buildQuickActions(),
 
           const SizedBox(height: 24),
@@ -283,7 +282,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
-            // ADDED MATERIAL CATALOG
             _buildQuickActionItem(
               title: 'Material Catalog',
               icon: Icons.inventory,
@@ -297,7 +295,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
-            // ADDED COST CONTROL
             _buildQuickActionItem(
               title: 'Cost Control',
               icon: Icons.analytics,

@@ -7,3 +7,4 @@ class IdGenerator {
         random.nextInt(999).toString();
   }
 }
+

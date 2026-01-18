@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
-import 'package:construction_manager/database/models/task.dart';
-import 'package:construction_manager/database/repositories/task_repository.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
+import 'package:construction_manager/data/models/task_model.dart';
+import 'package:construction_manager/data/repositories/task_repository.dart';
 
 class TaskProvider extends ChangeNotifier {
   final DBHelper dbHelper;
-  List<Task> _tasks = [];
+  List<TaskModel> _tasks = [];
   bool _isLoading = false;
-  Task? _selectedTask;
+  TaskModel? _selectedTask;
 
   TaskProvider({required this.dbHelper});
 
-  List<Task> get tasks => _tasks;
+  List<TaskModel> get tasks => _tasks;
   bool get isLoading => _isLoading;
-  Task? get selectedTask => _selectedTask;
+  TaskModel? get selectedTask => _selectedTask;
 
   final TaskRepository _repository = TaskRepository();
 
@@ -38,44 +38,44 @@ class TaskProvider extends ChangeNotifier {
     try {
       _tasks = await _repository.getTasksByProject(projectId);
     } catch (e) {
-      print('Error loading tasks by project: $e');
+      print('Error loading tasks by ProjectModel: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> addTask(Task task) async {
+  Future<void> addTask(TaskModel TaskModel) async {
     try {
-      final id = await _repository.addTask(task);
-      final newTask = task.copyWith(id: id);
+      final id = await _repository.addTask(TaskModel);
+      final newTask = TaskModel.copyWith(id: id);
       _tasks.add(newTask);
       notifyListeners();
     } catch (e) {
-      print('Error adding task: $e');
+      print('Error adding TaskModel: $e');
     }
   }
 
-  Future<void> updateTask(Task task) async {
+  Future<void> updateTask(TaskModel TaskModel) async {
     try {
-      await _repository.updateTask(task);
-      final index = _tasks.indexWhere((t) => t.id == task.id);
+      await _repository.updateTask(TaskModel);
+      final index = _tasks.indexWhere((t) => t.id == TaskModel.id);
       if (index != -1) {
-        _tasks[index] = task;
+        _tasks[index] = TaskModel;
         notifyListeners();
       }
     } catch (e) {
-      print('Error updating task: $e');
+      print('Error updating TaskModel: $e');
     }
   }
 
   Future<void> deleteTask(int id) async {
     try {
       await _repository.deleteTask(id);
-      _tasks.removeWhere((task) => task.id == id);
+      _tasks.removeWhere((TaskModel) => TaskModel.id == id);
       notifyListeners();
     } catch (e) {
-      print('Error deleting task: $e');
+      print('Error deleting TaskModel: $e');
     }
   }
 }

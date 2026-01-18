@@ -1,6 +1,6 @@
-// lib/features/labor/add_labor_screen.dart
+// lib/features/labor/add_labor_screen.dart - FIXED VERSION
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart'; // FIXED IMPORT
 
 class AddLaborScreen extends StatefulWidget {
   const AddLaborScreen({super.key});

@@ -1,5 +1,6 @@
-// lib/data/models/material_model.dart
-class Material {
+// lib/data/models/material_model.dart - COMPLETE FIXED VERSION
+// Renamed class from Material to MaterialModel to avoid conflict with Flutter's Material widget
+class MaterialModel {
   int? id;
   String name;
   String? code;
@@ -16,7 +17,7 @@ class Material {
   String? notes;
   DateTime createdAt;
 
-  Material({
+  MaterialModel({
     this.id,
     required this.name,
     this.code,
@@ -34,8 +35,8 @@ class Material {
     required this.createdAt,
   });
 
-  factory Material.fromMap(Map<String, dynamic> map) {
-    return Material(
+  factory MaterialModel.fromMap(Map<String, dynamic> map) {
+    return MaterialModel(
       id: map['id'] as int?,
       name: map['name'] as String,
       code: map['code'] as String?,
@@ -77,8 +78,45 @@ class Material {
   double get totalValue => currentStock * (unitPrice ?? 0);
   bool get isLowStock => minStockLevel != null && currentStock <= minStockLevel!;
 
+  // Added copyWith method for MaterialRepository
+  MaterialModel copyWith({
+    int? id,
+    String? name,
+    String? code,
+    String? description,
+    int? categoryId,
+    double? currentStock,
+    String? unit,
+    double? minStockLevel,
+    double? maxStockLevel,
+    double? unitPrice,
+    int? supplierId,
+    String? specifications,
+    String? imageUrl,
+    String? notes,
+    DateTime? createdAt,
+  }) {
+    return MaterialModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      code: code ?? this.code,
+      description: description ?? this.description,
+      categoryId: categoryId ?? this.categoryId,
+      currentStock: currentStock ?? this.currentStock,
+      unit: unit ?? this.unit,
+      minStockLevel: minStockLevel ?? this.minStockLevel,
+      maxStockLevel: maxStockLevel ?? this.maxStockLevel,
+      unitPrice: unitPrice ?? this.unitPrice,
+      supplierId: supplierId ?? this.supplierId,
+      specifications: specifications ?? this.specifications,
+      imageUrl: imageUrl ?? this.imageUrl,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   @override
   String toString() {
-    return 'Material(id: $id, name: $name, stock: $currentStock $unit, price: $unitPrice)';
+    return 'MaterialModel(id: $id, name: $name, stock: $currentStock $unit, price: $unitPrice)';
   }
 }

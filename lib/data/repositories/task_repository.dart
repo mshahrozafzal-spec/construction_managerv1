@@ -1,24 +1,38 @@
-import '../models/task_model.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
+// Updated import - now matches the renamed file
+import 'package:construction_manager/data/models/task_model.dart';
 
 class TaskRepository {
-  final List<TaskModel> _tasks = [];
+  final DBHelper dbHelper;
+
+  TaskRepository({DBHelper? dbHelper}) : dbHelper = dbHelper ?? DBHelper();
+
+  Future<int> addTask(TaskModel task) async {
+    return await dbHelper.insertTask(task.toMap());
+  }
+
+  Future<List<TaskModel>> getAllTasks({int? projectId}) async {
+    List<Map<String, dynamic>> tasks;
+
+    if (projectId != null) {
+      tasks = await dbHelper.getTasksByProject(projectId);
+    } else {
+      tasks = await dbHelper.getTasks();
+    }
+
+    return tasks.map((map) => TaskModel.fromMap(map)).toList();
+  }
 
   Future<List<TaskModel>> getTasksByProject(int projectId) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _tasks.where((t) => t.projectId == projectId).toList();
+    return getAllTasks(projectId: projectId);
   }
 
-  Future<void> addTask(TaskModel task) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _tasks.add(task);
+  Future<int> updateTask(TaskModel task) async {
+    if (task.id == null) return 0;
+    return await dbHelper.updateTask(task.id!, task.toMap());
   }
 
-  void updateTask(TaskModel task) {
-    final index = _tasks.indexWhere((t) => t.id == task.id);
-    if (index != -1) _tasks[index] = task;
-  }
-
-  void deleteTask(int id) {
-    _tasks.removeWhere((t) => t.id == id);
+  Future<int> deleteTask(int id) async {
+    return await dbHelper.deleteTask(id);
   }
 }

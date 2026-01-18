@@ -7,7 +7,7 @@ class LaborAttendanceReport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Labor Attendance Report'),
+        title: const Text('LaborModel Attendance Report'),
       ),
       body: const Center(
         child: Column(
@@ -16,7 +16,7 @@ class LaborAttendanceReport extends StatelessWidget {
             Icon(Icons.people, size: 100, color: Colors.green),
             SizedBox(height: 20),
             Text(
-              'Labor Attendance Report',
+              'LaborModel Attendance Report',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],

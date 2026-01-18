@@ -7,7 +7,7 @@ class TaskCalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Calendar'),
+        title: const Text('TaskModel Calendar'),
       ),
       body: const Center(
         child: Column(
@@ -16,7 +16,7 @@ class TaskCalendarScreen extends StatelessWidget {
             Icon(Icons.calendar_month, size: 100, color: Colors.green),
             SizedBox(height: 20),
             Text(
-              'Task Calendar',
+              'TaskModel Calendar',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),

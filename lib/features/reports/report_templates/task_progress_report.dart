@@ -7,7 +7,7 @@ class TaskProgressReport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Progress Report'),
+        title: const Text('TaskModel Progress Report'),
       ),
       body: const Center(
         child: Column(
@@ -16,7 +16,7 @@ class TaskProgressReport extends StatelessWidget {
             Icon(Icons.trending_up, size: 100, color: Colors.purple),
             SizedBox(height: 20),
             Text(
-              'Task Progress Report',
+              'TaskModel Progress Report',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],

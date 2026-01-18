@@ -1,6 +1,6 @@
 // lib/features/tasks/tasks_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
 import 'package:construction_manager/features/tasks/add_task_screen.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -45,8 +45,8 @@ class _TasksScreenState extends State<TasksScreen> {
     if (_filterStatus == 'All') {
       _filteredTasks = _tasks;
     } else {
-      _filteredTasks = _tasks.where((task) {
-        final status = task['status']?.toString().toLowerCase() ?? '';
+      _filteredTasks = _tasks.where((TaskModel) {
+        final status = TaskModel['status']?.toString().toLowerCase() ?? '';
         return status == _filterStatus.toLowerCase();
       }).toList();
     }
@@ -123,13 +123,13 @@ class _TasksScreenState extends State<TasksScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Create your first task',
+            'Create your first TaskModel',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _addNewTask,
-            child: const Text('Create Task'),
+            child: const Text('Create TaskModel'),
           ),
         ],
       ),
@@ -142,22 +142,22 @@ class _TasksScreenState extends State<TasksScreen> {
       child: ListView.builder(
         itemCount: _filteredTasks.length,
         itemBuilder: (context, index) {
-          final task = _filteredTasks[index];
-          return _buildTaskCard(task);
+          final TaskModel = _filteredTasks[index];
+          return _buildTaskCard(TaskModel);
         },
       ),
     );
   }
 
-  Widget _buildTaskCard(Map<String, dynamic> task) {
-    final title = task['title'] ?? 'Untitled Task';
-    final status = task['status']?.toString() ?? 'pending';
-    final priority = task['priority']?.toString() ?? 'medium';
-    final startDate = task['start_date']?.toString() ?? '';
-    final endDate = task['end_date']?.toString() ?? '';
-    final estimatedHours = (task['estimated_hours'] as num?)?.toDouble() ?? 0.0;
-    final actualHours = (task['actual_hours'] as num?)?.toDouble() ?? 0.0;
-    final taskId = task['id'] as int? ?? 0;
+  Widget _buildTaskCard(Map<String, dynamic> TaskModel) {
+    final title = TaskModel['title'] ?? 'Untitled TaskModel';
+    final status = TaskModel['status']?.toString() ?? 'pending';
+    final priority = TaskModel['priority']?.toString() ?? 'medium';
+    final startDate = TaskModel['start_date']?.toString() ?? '';
+    final endDate = TaskModel['end_date']?.toString() ?? '';
+    final estimatedHours = (TaskModel['estimated_hours'] as num?)?.toDouble() ?? 0.0;
+    final actualHours = (TaskModel['actual_hours'] as num?)?.toDouble() ?? 0.0;
+    final taskId = TaskModel['id'] as int? ?? 0;
 
     final progress = estimatedHours > 0 ? (actualHours / estimatedHours).clamp(0.0, 1.0) : 0.0;
 
@@ -217,7 +217,7 @@ class _TasksScreenState extends State<TasksScreen> {
           ],
         ),
         trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleTaskAction(value, taskId, task),
+          onSelected: (value) => _handleTaskAction(value, taskId, TaskModel),
           itemBuilder: (context) => [
             const PopupMenuItem(
               value: 'edit',
@@ -251,8 +251,8 @@ class _TasksScreenState extends State<TasksScreen> {
             ),
           ],
         ),
-        onTap: () => _viewTaskDetails(task),
-        onLongPress: () => _showTaskOptions(task),
+        onTap: () => _viewTaskDetails(TaskModel),
+        onLongPress: () => _showTaskOptions(TaskModel),
       ),
     );
   }
@@ -296,10 +296,10 @@ class _TasksScreenState extends State<TasksScreen> {
     }
   }
 
-  void _handleTaskAction(String action, int taskId, Map<String, dynamic> task) {
+  void _handleTaskAction(String action, int taskId, Map<String, dynamic> TaskModel) {
     switch (action) {
       case 'edit':
-        _editTask(task);
+        _editTask(TaskModel);
         break;
       case 'complete':
         _completeTask(taskId);
@@ -323,19 +323,19 @@ class _TasksScreenState extends State<TasksScreen> {
     });
   }
 
-  void _editTask(Map<String, dynamic> task) {
+  void _editTask(Map<String, dynamic> TaskModel) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit Task screen coming soon')),
+      const SnackBar(content: Text('Edit TaskModel screen coming soon')),
     );
   }
 
-  void _viewTaskDetails(Map<String, dynamic> task) {
+  void _viewTaskDetails(Map<String, dynamic> TaskModel) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Task Details screen coming soon')),
+      const SnackBar(content: Text('TaskModel Details screen coming soon')),
     );
   }
 
-  void _showTaskOptions(Map<String, dynamic> task) {
+  void _showTaskOptions(Map<String, dynamic> TaskModel) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -345,10 +345,10 @@ class _TasksScreenState extends State<TasksScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
-                title: const Text('Edit Task'),
+                title: const Text('Edit TaskModel'),
                 onTap: () {
                   Navigator.pop(context);
-                  _editTask(task);
+                  _editTask(TaskModel);
                 },
               ),
               ListTile(
@@ -356,7 +356,7 @@ class _TasksScreenState extends State<TasksScreen> {
                 title: const Text('View Details'),
                 onTap: () {
                   Navigator.pop(context);
-                  _viewTaskDetails(task);
+                  _viewTaskDetails(TaskModel);
                 },
               ),
               ListTile(
@@ -364,19 +364,19 @@ class _TasksScreenState extends State<TasksScreen> {
                 title: const Text('Mark Complete'),
                 onTap: () {
                   Navigator.pop(context);
-                  _completeTask(task['id'] as int);
+                  _completeTask(TaskModel['id'] as int);
                 },
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text(
-                  'Delete Task',
+                  'Delete TaskModel',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _deleteTask(task['id'] as int);
+                  _deleteTask(TaskModel['id'] as int);
                 },
               ),
             ],
@@ -394,11 +394,11 @@ class _TasksScreenState extends State<TasksScreen> {
       });
       _loadTasks();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task marked as completed')),
+        const SnackBar(content: Text('TaskModel marked as completed')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error completing task: $e')),
+        SnackBar(content: Text('Error completing TaskModel: $e')),
       );
     }
   }
@@ -407,8 +407,8 @@ class _TasksScreenState extends State<TasksScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task?'),
+        title: const Text('Delete TaskModel'),
+        content: const Text('Are you sure you want to delete this TaskModel?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -428,11 +428,11 @@ class _TasksScreenState extends State<TasksScreen> {
         await _dbHelper.deleteTask(taskId);
         _loadTasks();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Task deleted')),
+          const SnackBar(content: Text('TaskModel deleted')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting task: $e')),
+          SnackBar(content: Text('Error deleting TaskModel: $e')),
         );
       }
     }

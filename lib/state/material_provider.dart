@@ -1,4 +1,3 @@
-// lib/state/material_provider.dart
 import 'package:flutter/material.dart';
 import 'package:construction_manager/data/repositories/material_repository.dart';
 import 'package:construction_manager/data/models/material_model.dart';
@@ -9,18 +8,18 @@ class MaterialProvider extends ChangeNotifier {
   final MaterialRepository _repository;
 
   // State variables
-  List<Material> _materials = [];
-  List<MaterialCategory> _categories = [];
-  List<Supplier> _suppliers = [];
+  List<MaterialModel> _materials = [];
+  List<MaterialCategoryModel> _categories = [];
+  List<SupplierModel> _suppliers = [];
   bool _isLoading = false;
   String? _error;
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
   // Getters
-  List<Material> get materials => _materials;
-  List<MaterialCategory> get categories => _categories;
-  List<Supplier> get suppliers => _suppliers;
+  List<MaterialModel> get materials => _materials;
+  List<MaterialCategoryModel> get categories => _categories;
+  List<SupplierModel> get suppliers => _suppliers;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String get searchQuery => _searchQuery;
@@ -32,20 +31,25 @@ class MaterialProvider extends ChangeNotifier {
         (sum, material) => sum + material.totalValue,
   );
 
-  List<Material> get lowStockMaterials =>
+  List<MaterialModel> get lowStockMaterials =>
       _materials.where((m) => m.isLowStock).toList();
 
-  List<Material> get filteredMaterials {
+  List<MaterialModel> get filteredMaterials {
     var filtered = _materials;
 
     // Apply category filter
     if (_selectedCategory != 'All') {
       final category = _categories.firstWhere(
             (c) => c.name == _selectedCategory,
-        orElse: () => MaterialCategory(name: '', createdAt: DateTime.now()),
+        orElse: () => MaterialCategoryModel(name: '', createdAt: DateTime.now()),
       );
       if (category.id != null) {
         filtered = filtered.where((m) => m.categoryId == category.id).toList();
+      } else {
+        // Handle 'All' category or uncategorized
+        if (_selectedCategory == 'Uncategorized') {
+          filtered = filtered.where((m) => m.categoryId == null).toList();
+        }
       }
     }
 
@@ -54,8 +58,8 @@ class MaterialProvider extends ChangeNotifier {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((material) {
         return material.name.toLowerCase().contains(query) ||
-            material.code?.toLowerCase().contains(query) ?? false ||
-            material.description?.toLowerCase().contains(query) ?? false;
+            (material.code?.toLowerCase().contains(query) ?? false) ||
+            (material.description?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
 
@@ -87,7 +91,7 @@ class MaterialProvider extends ChangeNotifier {
   }
 
   /// Add new material
-  Future<void> addMaterial(Material material) async {
+  Future<void> addMaterial(MaterialModel material) async {
     _setLoading(true);
     try {
       await _repository.addMaterial(material);
@@ -102,7 +106,7 @@ class MaterialProvider extends ChangeNotifier {
   }
 
   /// Update existing material
-  Future<void> updateMaterial(Material material) async {
+  Future<void> updateMaterial(MaterialModel material) async {
     _setLoading(true);
     try {
       await _repository.updateMaterial(material);
@@ -132,7 +136,7 @@ class MaterialProvider extends ChangeNotifier {
   }
 
   /// Add new supplier
-  Future<void> addSupplier(Supplier supplier) async {
+  Future<void> addSupplier(SupplierModel supplier) async {
     _setLoading(true);
     try {
       await _repository.addSupplier(supplier);
@@ -148,7 +152,7 @@ class MaterialProvider extends ChangeNotifier {
   }
 
   /// Add new category
-  Future<void> addCategory(MaterialCategory category) async {
+  Future<void> addCategory(MaterialCategoryModel category) async {
     _setLoading(true);
     try {
       await _repository.addCategory(category);
@@ -199,18 +203,30 @@ class MaterialProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Material? findMaterialById(int id) {
-    return _materials.firstWhere((m) => m.id == id, orElse: () => null);
+  MaterialModel? findMaterialById(int id) {
+    try {
+      return _materials.firstWhere((m) => m.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
-  MaterialCategory? findCategoryById(int? id) {
+  MaterialCategoryModel? findCategoryById(int? id) {
     if (id == null) return null;
-    return _categories.firstWhere((c) => c.id == id, orElse: () => null);
+    try {
+      return _categories.firstWhere((c) => c.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
-  Supplier? findSupplierById(int? id) {
+  SupplierModel? findSupplierById(int? id) {
     if (id == null) return null;
-    return _suppliers.firstWhere((s) => s.id == id, orElse: () => null);
+    try {
+      return _suppliers.firstWhere((s) => s.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> adjustStock(int materialId, double adjustment) async {

@@ -1,19 +1,19 @@
-// lib/state/providers/labour_provider.dart
+// lib/state/providers/labor_provider.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/db_helper.dart';
-import 'package:construction_manager/database/models/labor.dart';
+import 'package:construction_manager/data/local/db_helper.dart';
+import 'package:construction_manager/data/models/labor_model.dart';
 
-class LabourProvider with ChangeNotifier {
+class laborProvider with ChangeNotifier {
   final DBHelper dbHelper;
-  List<Labor> _labors = [];
+  List<LaborModel> _labors = [];
   bool _isLoading = false;
-  Labor? _selectedLabor;
+  LaborModel? _selectedLabor;
 
-  LabourProvider(this.dbHelper);
+  laborProvider(this.dbHelper);
 
-  List<Labor> get labors => _labors;
+  List<LaborModel> get labors => _labors;
   bool get isLoading => _isLoading;
-  Labor? get selectedLabor => _selectedLabor;
+  LaborModel? get selectedLabor => _selectedLabor;
 
   Future<void> loadLabors() async {
     _isLoading = true;
@@ -21,7 +21,7 @@ class LabourProvider with ChangeNotifier {
 
     try {
       final laborData = await dbHelper.getAllLabor();
-      _labors = laborData.map((map) => Labor.fromMap(map)).toList();
+      _labors = laborData.map((map) => LaborModel.fromMap(map)).toList();
     } catch (e) {
       print('Error loading labors: $e');
     } finally {
@@ -37,35 +37,35 @@ class LabourProvider with ChangeNotifier {
     try {
       final laborData = await dbHelper.getAllLabor();
       _labors = laborData
-          .where((labor) => labor['project_id'] == projectId)
-          .map((map) => Labor.fromMap(map))
+          .where((LaborModel) => LaborModel['project_id'] == projectId)
+          .map((map) => LaborModel.fromMap(map))
           .toList();
     } catch (e) {
-      print('Error loading labors by project: $e');
+      print('Error loading labors by ProjectModel: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> addLabor(Labor labor) async {
+  Future<void> addLabor(LaborModel LaborModel) async {
     try {
-      await dbHelper.insertLabor(labor.toMap());
+      await dbHelper.insertLabor(LaborModel.toMap());
       await loadLabors();
     } catch (e) {
-      print('Error adding labor: $e');
+      print('Error adding LaborModel: $e');
       rethrow;
     }
   }
 
-  Future<void> updateLabor(Labor labor) async {
+  Future<void> updateLabor(LaborModel LaborModel) async {
     try {
-      if (labor.id != null) {
-        await dbHelper.updateLabor(labor.id!, labor.toMap());
+      if (LaborModel.id != null) {
+        await dbHelper.updateLabor(LaborModel.id!, LaborModel.toMap());
         await loadLabors();
       }
     } catch (e) {
-      print('Error updating labor: $e');
+      print('Error updating LaborModel: $e');
       rethrow;
     }
   }
@@ -75,13 +75,13 @@ class LabourProvider with ChangeNotifier {
       await dbHelper.deleteLabor(id);
       await loadLabors();
     } catch (e) {
-      print('Error deleting labor: $e');
+      print('Error deleting LaborModel: $e');
       rethrow;
     }
   }
 
-  void selectLabor(Labor? labor) {
-    _selectedLabor = labor;
+  void selectLabor(LaborModel? LaborModel) {
+    _selectedLabor = LaborModel;
     notifyListeners();
   }
 }

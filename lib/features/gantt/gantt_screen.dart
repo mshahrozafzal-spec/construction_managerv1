@@ -1,7 +1,7 @@
 // lib/features/gantt/gantt_screen.dart
 import 'package:flutter/material.dart';
-import 'package:construction_manager/database/models/task.dart';
-import 'package:construction_manager/database/repositories/task_repository.dart';
+import 'package:construction_manager/data/models/task_model.dart';
+import 'package:construction_manager/data/repositories/task_repository.dart';
 import 'package:construction_manager/features/gantt/gantt_chart_widget.dart';
 
 class GanttScreen extends StatefulWidget {
@@ -14,7 +14,7 @@ class GanttScreen extends StatefulWidget {
 }
 
 class _GanttScreenState extends State<GanttScreen> {
-  late Future<List<Task>> _tasksFuture;
+  late Future<List<TaskModel>> _tasksFuture;
   late TaskRepository _taskRepository;
 
   @override
@@ -38,7 +38,7 @@ class _GanttScreenState extends State<GanttScreen> {
       appBar: AppBar(
         title: const Text('Gantt Chart'),
       ),
-      body: FutureBuilder<List<Task>>(
+      body: FutureBuilder<List<TaskModel>>(
         future: _tasksFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -53,26 +53,26 @@ class _GanttScreenState extends State<GanttScreen> {
 
           // Fixed: Handle nullable endDate properly
           final now = DateTime.now();
-          final upcomingTasks = tasks.where((task) {
-            // Check if task is upcoming (starts in next 7 days)
-            return task.startDate.isAfter(now) &&
-                task.startDate.isBefore(now.add(const Duration(days: 7)));
+          final upcomingTasks = tasks.where((TaskModel) {
+            // Check if TaskModel is upcoming (starts in next 7 days)
+            return TaskModel.startDate.isAfter(now) &&
+                TaskModel.startDate.isBefore(now.add(const Duration(days: 7)));
           }).toList();
 
           // Fixed: Handle null endDate properly
-          final delayedTasks = tasks.where((task) {
-            if (task.endDate == null) return false;
-            // Fixed: Check if task is delayed (past end date and not completed)
-            return task.endDate!.isBefore(now) && task.status != 'Completed';
+          final delayedTasks = tasks.where((TaskModel) {
+            if (TaskModel.endDate == null) return false;
+            // Fixed: Check if TaskModel is delayed (past end date and not completed)
+            return TaskModel.endDate!.isBefore(now) && TaskModel.status != 'Completed';
           }).toList();
 
           // Fixed: Calculate duration only if endDate is not null
-          for (final task in tasks) {
-            if (task.endDate != null) {
-              final duration = task.endDate!.difference(task.startDate).inDays;
+          for (final TaskModel in tasks) {
+            if (TaskModel.endDate != null) {
+              final duration = TaskModel.endDate!.difference(TaskModel.startDate).inDays;
               // Fixed: Use isDelayed property
-              if (task.isDelayed) {
-                print('Task "${task.title}" is delayed by ${duration} days');
+              if (TaskModel.isDelayed) {
+                print('TaskModel "${TaskModel.title}" is delayed by ${duration} days');
               }
             }
           }

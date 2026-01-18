@@ -8,9 +8,9 @@ class ExpenseFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Expense')),
+      appBar: AppBar(title: const Text('Add ExpenseModel')),
       body: const Center(
-        child: Text('Expense Form - Coming Soon'),
+        child: Text('ExpenseModel Form - Coming Soon'),
       ),
     );
   }

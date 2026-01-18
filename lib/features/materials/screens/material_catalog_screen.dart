@@ -1,4 +1,3 @@
-// lib/features/materials/screens/material_catalog_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:construction_manager/state/material_provider.dart';
@@ -18,7 +17,6 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
   @override
   void initState() {
     super.initState();
-    // Load materials when screen initializes
     Future.microtask(() {
       Provider.of<MaterialProvider>(context, listen: false).loadMaterials();
     });
@@ -105,8 +103,9 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
                         children: [
                           _buildCategoryChip('All', provider),
                           ...provider.categories.map((category) =>
-                              _buildCategoryChip(category.name, provider)
-                          ).toList(),
+                              _buildCategoryChip(category.name, provider)).toList(),
+                          if (provider.materials.any((m) => m.categoryId == null))
+                            _buildCategoryChip('Uncategorized', provider),
                         ],
                       ),
                     ),
@@ -241,7 +240,7 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
     );
   }
 
-  Widget _buildMaterialCard(Material material, MaterialProvider provider) {
+  Widget _buildMaterialCard(MaterialModel material, MaterialProvider provider) {
     final category = provider.findCategoryById(material.categoryId);
     final supplier = provider.findSupplierById(material.supplierId);
 
@@ -346,67 +345,72 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
     );
   }
 
-  void _showMaterialDetails(Material material, MaterialProvider provider) {
+  void _showMaterialDetails(MaterialModel material, MaterialProvider provider) {
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-            title: Text(material.name),
-            content: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                    if (material.code != null) _buildDetailRow('Code', material.code!),
-            if (material.description != null) _buildDetailRow('Description', material.description!),
-    _buildDetailRow('Stock', '${material.currentStock} ${material.unit}'),
-    if (material.unitPrice != null) _buildDetailRow('Unit Price', '₹${material.unitPrice}/${material.unit}'),
-    if (material.minStockLevel != null) _buildDetailRow('Min Stock', '${material.minStockLevel} ${material.unit}'),
-    if (material.maxStockLevel != null) _buildDetailRow('Max Stock', '${material.maxStockLevel} ${material.unit}'),
-    if (material.categoryId != null) {
-    final category = provider.findCategoryById(material.categoryId);
-    _buildDetailRow('Category', category?.name ?? 'Unknown'),
-    }
-    if (material.supplierId != null) {
-    final supplier = provider.findSupplierById(material.supplierId);
-    _buildDetailRow('Supplier', supplier?.name ?? 'Unknown'),
-    }
-    if (material.specifications != null) _buildDetailRow('Specifications', material.specifications!),
-    if (material.notes != null) _buildDetailRow('Notes', material.notes!),
-    _buildDetailRow('Added On', '${material.createdAt.day}/${material.createdAt.month}/${material.createdAt.year}'),
-    ],
-    ),
-    ),
-    actions: [
-    TextButton(
-    onPressed: () => Navigator.pop(context),
-    child: const Text('Close'),
-    ),
-    ],
-    ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(material.name),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (material.code != null) _buildDetailRow('Code', material.code!),
+              if (material.description != null) _buildDetailRow('Description', material.description!),
+              _buildDetailRow('Stock', '${material.currentStock} ${material.unit}'),
+              if (material.unitPrice != null) _buildDetailRow('Unit Price', '₹${material.unitPrice}/${material.unit}'),
+              if (material.minStockLevel != null) _buildDetailRow('Min Stock', '${material.minStockLevel} ${material.unit}'),
+              if (material.maxStockLevel != null) _buildDetailRow('Max Stock', '${material.maxStockLevel} ${material.unit}'),
+              _buildDetailRow(
+                'Category',
+                material.categoryId != null
+                    ? (provider.findCategoryById(material.categoryId)?.name ?? 'Unknown')
+                    : 'Uncategorized',
+              ),
+              if (material.supplierId != null)
+                _buildDetailRow(
+                  'Supplier',
+                  provider.findSupplierById(material.supplierId)?.name ?? 'Unknown',
+                ),
+              if (material.specifications != null) _buildDetailRow('Specifications', material.specifications!),
+              if (material.notes != null) _buildDetailRow('Notes', material.notes!),
+              _buildDetailRow('Total Value', '₹${material.totalValue.toStringAsFixed(2)}'),
+              _buildDetailRow('Stock Status', material.isLowStock ? 'Low Stock ⚠️' : 'Normal'),
+              _buildDetailRow('Added On', '${material.createdAt.day}/${material.createdAt.month}/${material.createdAt.year}'),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );
   }
 
-  void _showMaterialOptions(Material material, MaterialProvider provider) {
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 100,
+              child: Text(
+                '$label:',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(value)),
+          ],
+        )
+    );
+  }
+
+  void _showMaterialOptions(MaterialModel material, MaterialProvider provider) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -427,7 +431,6 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
                 title: const Text('Edit Material'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Navigate to edit screen
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Edit feature coming soon')),
                   );
@@ -439,7 +442,6 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
                   title: const Text('Order More'),
                   onTap: () {
                     Navigator.pop(context);
-                    // TODO: Navigate to order screen
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Order feature coming soon')),
                     );
@@ -464,7 +466,7 @@ class _MaterialCatalogScreenState extends State<MaterialCatalogScreen> {
     );
   }
 
-  Future<void> _deleteMaterial(Material material, MaterialProvider provider) async {
+  Future<void> _deleteMaterial(MaterialModel material, MaterialProvider provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
